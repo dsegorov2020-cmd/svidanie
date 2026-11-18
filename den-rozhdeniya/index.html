@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>С днём рождения! 🎂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --pink:#ff4f8b; --pink2:#ff8fb3; --text:#24452a; --line:#cfe6c4; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; min-height:100%; overflow-x:hidden; }
+  html { height:100%; }
+  body {
+    font-family:'Nunito',system-ui,sans-serif; color:var(--text);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(214,245,190,.9), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(120,190,110,.55), transparent 50%),
+      radial-gradient(circle at 90% 15%, rgba(170,220,150,.6), transparent 40%),
+      linear-gradient(160deg, #e6f7d9 0%, #b9e3a6 45%, #7fbf7a 100%);
+    background-attachment:fixed;
+    display:flex; padding:16px 0; min-height:100vh; min-height:100dvh;
+    touch-action:manipulation; user-select:none; -webkit-user-select:none;
+  }
+  .leaves { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .leaves span { position:absolute; top:-50px; font-size:24px; opacity:.75; animation:down linear infinite; }
+  @keyframes down { 0%{transform:translateY(0) rotate(0)} 50%{transform:translate(40px,55vh) rotate(160deg)} 100%{transform:translate(-20px,115vh) rotate(320deg); opacity:.2;} }
+
+  .card {
+    position:relative; z-index:1; width:min(92vw,480px); margin:auto;
+    background:rgba(255,255,255,.9); backdrop-filter:blur(6px);
+    border-radius:28px; padding:30px 20px 32px; text-align:center;
+    box-shadow:0 20px 50px rgba(40,100,50,.25);
+    transition:width .35s;
+  }
+  .card.wide { width:min(96vw,1180px); }
+  .emoji { font-size:72px; line-height:1; margin-bottom:12px; animation:beat 1.2s infinite; display:inline-block; }
+  @keyframes beat { 0%,100%{transform:scale(1)} 15%{transform:scale(1.15)} 30%{transform:scale(1)} 45%{transform:scale(1.1)} }
+  h1 { font-family:'Playfair Display',Georgia,serif; font-size:clamp(24px,5vw,34px); margin:0 0 8px; }
+  p.bday { font-size:17px; line-height:1.5; margin:4px 0 14px; }
+  p.sub { margin:0 0 22px; font-size:15px; opacity:.85; min-height:20px; }
+  .btns { display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; min-height:70px; }
+  button {
+    font-family:inherit; font-weight:700; border:0; cursor:pointer;
+    border-radius:999px; padding:14px 30px; font-size:18px;
+    transition:transform .25s, font-size .25s, padding .25s;
+  }
+  #yes { background:linear-gradient(135deg,var(--pink),var(--pink2)); color:#fff; box-shadow:0 8px 20px rgba(255,79,139,.4); }
+  #yes:active { transform:scale(.96); }
+  #no { background:#fff; color:var(--text); border:2px solid var(--line); touch-action:none; }
+  #no.flying { position:fixed; z-index:5; transition:left .22s ease, top .22s ease; }
+
+  .screen { display:none; }
+  .screen.active { display:block; animation:fade .4s; }
+  @keyframes fade { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+
+  .rowtitle { text-align:left; font-weight:700; font-size:15px; margin:14px 4px 8px; }
+  .row {
+    display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; text-align:left;
+  }
+  @media (max-width: 900px) {
+    .row {
+      display:flex; overflow-x:auto; scroll-snap-type:x mandatory; padding:2px 2px 10px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .row .rest { flex:0 0 72%; max-width:260px; scroll-snap-align:start; }
+    .swipe { display:block !important; }
+  }
+  .swipe { display:none; font-size:12px; opacity:.6; margin:-2px 0 4px; }
+  .rest {
+    display:flex; flex-direction:column; gap:6px; cursor:pointer;
+    background:#fff; border:2px solid var(--line); border-radius:20px; padding:14px 12px;
+    font-size:13px; color:var(--text); transition:border-color .2s, background .2s, transform .2s, box-shadow .2s;
+  }
+  .rest:hover { transform:translateY(-2px); }
+
+  .ico { width:56px; height:56px; border-radius:18px; display:grid; place-items:center;
+         background:linear-gradient(135deg,#ff6f9f,#ffb36b); box-shadow:0 8px 18px rgba(255,111,159,.35); }
+  .row2 .ico { background:linear-gradient(135deg,#6f8cff,#c77dff); box-shadow:0 8px 18px rgba(111,140,255,.35); }
+  .ico svg { width:30px; height:30px; fill:none; stroke:#fff; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .rest .name { font-family:'Playfair Display',Georgia,serif; font-size:18px; }
+  .rowtitle { display:flex; align-items:center; gap:8px; font-family:'Playfair Display',Georgia,serif; font-size:19px !important; }
+  .rowtitle svg { width:22px; height:22px; fill:none; stroke:#d6336c; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .mi { display:inline-grid; place-items:center; width:16px; height:16px; border-radius:50%; background:#0b6fd6; color:#fff; font-size:10px; font-weight:800; margin-right:4px; vertical-align:-3px; }
+
+  .rest .name { font-weight:700; font-size:16px; }
+  .rest .music { align-self:flex-start; font-size:10.5px; font-weight:700; color:#fff; background:linear-gradient(135deg,#8a5cf6,#d946ef); border-radius:999px; padding:2px 8px; margin-top:-2px; }
+  .rest .cuisine { font-size:12px; font-weight:800; color:#7a4b8f; }
+  .rest .dish { display:block; background:linear-gradient(135deg,#fff3f8,#fff8ec); border:1px dashed #f3b6c9; border-radius:12px; padding:8px 10px; font-size:12.5px; line-height:1.4; }
+  .rest .dish b { display:block; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#d6336c; margin-bottom:2px; }
+  .rest .view { flex:0 0 auto !important; }
+  .rest .addr { margin-top:auto; }
+  .rest .gift { font-size:12px; font-weight:800; color:#2f8a3b; background:#eefae9; border-radius:10px; padding:5px 8px; }
+  .rest .metro { align-self:flex-start; font-size:12px; font-weight:700; background:#eef8ea; border-radius:999px; padding:4px 10px; }
+  .rest .view { line-height:1.4; opacity:.9; flex:1; }
+  .rest .addr { font-size:12px; opacity:.7; }
+  .rest .photo { align-self:flex-start; font-size:12px; font-weight:700; color:#d6336c; text-decoration:none; border:1.5px solid #f6c6d6; border-radius:999px; padding:5px 11px; background:#fff; }
+  .rest.sel { border-color:var(--pink); background:#fff4f8; box-shadow:0 8px 20px rgba(255,79,139,.22); }
+  .rest.sel .name::after { content:' 💘'; }
+
+  .bottom { max-width:440px; margin:0 auto; }
+  .when { display:grid; grid-template-columns:1fr; gap:10px; text-align:left; }
+  .when label { font-size:13px; font-weight:700; display:flex; flex-direction:column; gap:6px; }
+  .when select {
+    font-family:inherit; font-size:16px; color:var(--text); background:#fff;
+    border:2px solid var(--line); border-radius:14px; padding:11px 10px; width:100%;
+    -webkit-appearance:none; appearance:none; min-height:48px;
+  }
+  .when select:focus { outline:none; border-color:var(--pink); }
+  p.err { color:#d6336c; margin:10px 0 0; min-height:18px; font-size:14px; }
+  #done { margin-top:10px; width:100%; background:linear-gradient(135deg,var(--pink),var(--pink2)); color:#fff; box-shadow:0 8px 20px rgba(255,79,139,.4); }
+  .confetti { position:fixed; top:-20px; width:10px; height:14px; z-index:10; pointer-events:none; animation:fall linear forwards; }
+  @keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
+</style>
+</head>
+<body>
+<div class="leaves" id="leaves"></div>
+
+<div class="card" id="card">
+  <!-- Экран 1: вопрос -->
+  <div class="screen active" id="s1">
+    <div class="emoji">🎂</div>
+    <h1>С днём рождения, солнышко! 🎉</h1>
+    <p class="bday">Приглашаю тебя 21 ноября отметить твой праздник вдвоём:<br>красивый ресторан и огни вечернего Петербурга ✨</p>
+    <p class="sub" id="hint">Ну что, идём? 🙂</p>
+    <div class="btns">
+      <button id="yes">Да</button>
+      <button id="no">Нет</button>
+    </div>
+  </div>
+
+  <!-- Экран 2: выбор ресторана -->
+  <div class="screen" id="s2">
+    <div class="emoji">🥰</div>
+    <h1>Ура! Будет праздник! 🥂</h1>
+    <p class="sub" style="margin-bottom:6px">Надевай самое красивое платье 👗 и выбирай, где отметим твой день рождения:</p>
+
+    <div class="rowtitle"><svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5z"/><path d="M5 21h14"/></svg>Дворцовая роскошь</div>
+    <div class="swipe">листай вбок →</div>
+    <div class="row" id="row1"></div>
+
+    <div class="rowtitle"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Вид, от которого захватывает дух</div>
+    <div class="swipe">листай вбок →</div>
+    <div class="row row2" id="row2"></div>
+
+    <div class="bottom">
+      <p class="sub" style="margin:22px 0 10px">Суббота, 21 ноября. Предлагаю столик на <b>19:00</b>: город уже в огнях, а к 20:00 во многих ресторанах начинается живая музыка 🎶<br>Если удобнее другое время, просто поменяй:</p>
+      <div class="when">
+        <label>Время<select id="time"></select></label>
+      </div>
+      <p class="sub err" id="err"></p>
+      <button id="done">Готово 💘</button>
+    </div>
+  </div>
+
+  <!-- Экран 3: финал -->
+  <div class="screen" id="s3">
+    <div class="emoji">💖</div>
+    <h1>Договорились! 🎉</h1>
+    <p class="sub" id="final"></p>
+    <p class="sub" style="margin-top:-8px">Сделай скриншот и отправь мне 😉</p>
+  </div>
+</div>
+
+<script>
+  const ICONS = {
+    crown:'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5z"/><path d="M5 21h14"/><circle cx="12" cy="14" r="1.2"/>',
+    swan:'<path d="M15 5.5a2.2 2.2 0 0 1 3.4 1.2l2.1 1-2.2.7c-.3 2.4-2.7 3.6-2.7 6.3a5 5 0 0 1-5 4.8H6.5A3.5 3.5 0 0 1 3 16c3 1.2 6.4.6 8.6-2.2"/><path d="M15 5.5c-1.6 1.3-1.4 3.4-.3 5"/><path d="M3 21h18"/>',
+    quill:'<path d="M20 3C12 4 7.5 9.5 6.5 17.5"/><path d="M20 3c-1 7-6 12.5-13.5 14.5"/><path d="M9.5 13.5h5"/><path d="M6.5 17.5L4 21"/>',
+    flame:'<path d="M12 3c.6 3.5 5 5.2 5 10a5 5 0 0 1-10 0c0-2.6 1.6-3.8 2-6 1.2 1 2 2.3 2 4 1.4-1.8 1.6-4.6 1-8z"/><path d="M5 21h14"/>',
+    flower:'<circle cx="12" cy="12" r="2"/><path d="M12 10c-2-2-2-5 0-7 2 2 2 5 0 7z"/><path d="M12 10c-2-2-2-5 0-7 2 2 2 5 0 7z" transform="rotate(72 12 12)"/><path d="M12 10c-2-2-2-5 0-7 2 2 2 5 0 7z" transform="rotate(144 12 12)"/><path d="M12 10c-2-2-2-5 0-7 2 2 2 5 0 7z" transform="rotate(216 12 12)"/><path d="M12 10c-2-2-2-5 0-7 2 2 2 5 0 7z" transform="rotate(288 12 12)"/>',
+    dome:'<path d="M12 2v2.5"/><path d="M10.5 6.5a1.5 1.5 0 0 1 3 0V8h-3z"/><path d="M6.5 13a5.5 5.5 0 0 1 11 0"/><path d="M5 13h14"/><path d="M6 13v8M9 13v8M12 13v8M15 13v8M18 13v8"/><path d="M3.5 21h17"/>',
+    columns:'<path d="M12 3l9 5H3z"/><path d="M4 10h16"/><path d="M6 10v9M10 10v9M14 10v9M18 10v9"/><path d="M3 21h18"/>',
+    anchor:'<circle cx="12" cy="5" r="2"/><path d="M12 7v14"/><path d="M8 11h8"/><path d="M4.5 14a7.5 7.5 0 0 0 15 0"/><path d="M4.5 14l-1.5 1.5M19.5 14l1.5 1.5"/>',
+    moon:'<path d="M15.5 3.5a6.5 6.5 0 1 0 5 10 5.2 5.2 0 0 1-5-10z"/><path d="M2.5 19.5c2 0 2-1.2 4-1.2s2 1.2 4 1.2 2-1.2 4-1.2 2 1.2 4 1.2 2-1.2 3-1.2"/>',
+    chandelier:'<path d="M12 2v4"/><path d="M5 10c0-2.2 3.1-4 7-4s7 1.8 7 4"/><path d="M5 10v3M12 10v3M19 10v3M8.5 9v5M15.5 9v5"/><circle cx="5" cy="14.5" r="1.1"/><circle cx="12" cy="14.5" r="1.1"/><circle cx="19" cy="14.5" r="1.1"/><path d="M12 16v3M9 21h6"/>',
+    mask:'<path d="M3.5 4h9v6a4.5 4.5 0 0 1-9 0z"/><path d="M6 8h.01M10 8h.01"/><path d="M6 11.3c1 1 3 1 4 0"/><path d="M13.5 9h7v5a3.5 3.5 0 0 1-7 0"/><path d="M15.5 12h.01M18.5 12h.01"/><path d="M15.5 15.6c.8-.7 2.2-.7 3 0"/>',
+    sail:'<path d="M12 3v14"/><path d="M12 4.5l7 11h-7"/><path d="M11 7.5L5.5 15.5H11"/><path d="M3 18h18l-2.5 3h-13z"/>'
+  };
+  const svgIcon = k => '<svg viewBox="0 0 24 24">' + ICONS[k] + '</svg>';
+
+  const row1 = [
+    { e:'crown', name:'Палкинъ', music:'по вечерам',  metro:'Маяковская', cuisine:'Русская аристократическая', view:'Ресторан с 1785 года: хрустальные люстры, лепнина, фрески и свечи в канделябрах.', dish:'Молодая утка в соляном панцире — официант фламбирует её в коньяке прямо у стола 🔥', addr:'Невский пр., 47', q:'ресторан Палкинъ Невский 47' },
+    { e:'swan', name:'Il Lago dei Cigni', music:'по вечерам',  metro:'Крестовский остров', cuisine:'Итальянская', view:'«Лебединое озеро»: люстра-дерево из белых кристаллов, окна в пол на пруд.', dish:'Тальолини с трюфелем, которые подают прямо в голове пармезана 🧀', addr:'Северная дорога, 21', q:'ресторан Il Lago dei Cigni Крестовский' },
+    { e:'chandelier', name:'Academia Шувалова', metro:'Чернышевская', cuisine:'Европейская авторская', view:'Особняк графа Шувалова XIX века: восстановленный кабинет графа и потолок с почти ювелирной лепниной.', tag:'Изюминка', dish:'«Графские» вечера: актёры в роли семьи Шувалова встречают гостей, будто вы приехали к ним в гости ✨', addr:'Моховая ул., 10', q:'Academia Шувалова Моховая 10' },
+    { e:'mask', name:'Дача Шаляпина', metro:'Площадь Мужества', cuisine:'Русская и европейская', view:'Театр-ресторан в отреставрированном особняке 1914 года: бальный зал, зал с изразцами, зимняя веранда.', tag:'Изюминка', dish:'Это театр-ресторан: в бальном зале особняка идут спектакли — ужин превращается в событие 🎭', addr:'пр. Тореза, 8', q:'Дача Шаляпина 1914 Тореза 8' },
+    { e:'flower', name:'Ginza', metro:'Петроградская', cuisine:'Европейская, японская, итальянская', view:'Флагман Ginza Project: изумрудные диваны, свечи, драпированный потолок и стены-соты с винтажным шампанским и бургундским.', dish:'Паста, которую готовят в сырной голове прямо у вашего столика 🍝', addr:'Аптекарский пр., 16', q:'ресторан Ginza Аптекарский 16' }
+  ];
+  const row2 = [
+    { e:'dome', name:'Мансарда', metro:'Адмиралтейская', cuisine:'Европейская, итальянская, паназиатская', view:'Купол Исаакиевского собора прямо за стеклянной стеной — самый знаменитый вид Петербурга.', dish:'Гости особенно хвалят блюдо с нежнейшим осьминогом 🐙', addr:'Почтамтская ул., 3–5', q:'ресторан Мансарда Почтамтская 3' },
+    { e:'columns', name:'Terrassa', music:true,  metro:'Невский проспект', cuisine:'Фьюжн: Италия, Япония, Таиланд, Франция', view:'Крыша в самом центре: купол и колоннада Казанского собора как на ладони.', dish:'Роу-бар с открытой кухни: устрицы, суши и димсамы 🦪', addr:'Казанская ул., 3А', q:'ресторан Terrassa Казанская 3' },
+    { e:'anchor', name:'Фрегат «Благодать»', metro:'Горьковская', cuisine:'Средиземноморская и русская', view:'Ужин на трёхпалубном корабле у Троицкого моста: панорама Невы и зал в стиле императорского театра.', dish:'Гребешок с трюфельным пюре или оливье с камчатским крабом 🦀', gift:'В день рождения скидка 15% по паспорту', addr:'Петровская наб., напротив д. 2', q:'ресторан Фрегат Благодать Петровская набережная' },
+    { e:'moon', name:'Крыша 18', music:'концерты по выходным',  metro:'Горьковская', cuisine:'Средиземноморская и паназиатская', view:'Крыша на Петроградской набережной: Нева и крейсер «Аврора» прямо перед окнами.', dish:'Блюда с гриля и роллы из собственного суши-бара 🍣', addr:'Петроградская наб., 18', q:'ресторан Крыша 18 Петроградская набережная' },
+    { e:'sail', name:'Паруса на крыше', music:'чт–вс с 20:00',  metro:'Маяковская', cuisine:'Европейская и русская', view:'Панорамная крыша в центре: огни ночного Петербурга.', tag:'Изюминка вечера', dish:'Именно 21 ноября в 20:00 — живая скрипка на крыше 🎻', gift:'Имениннице скидка 20% на весь счёт (±7 дней)', addr:'ул. Марата, 5', q:'ресторан Паруса на крыше Марата 5' }
+  ];
+
+  // Падающие листики
+  const leaves = document.getElementById('leaves');
+  const ls = ['🍃','🎈','🌿','🍃','💚','🎈','🌿','💖'];
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('span');
+    s.textContent = ls[i % ls.length];
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.fontSize = 16 + Math.random() * 22 + 'px';
+    s.style.animationDuration = 7 + Math.random() * 8 + 's';
+    s.style.animationDelay = -Math.random() * 12 + 's';
+    leaves.appendChild(s);
+  }
+
+  const yes = document.getElementById('yes');
+  const no = document.getElementById('no');
+  const hint = document.getElementById('hint');
+  const phrases = [
+    'Точно нет? 🥺', 'Подумай ещё!', 'Не-а, не поймаешь 😜', 'Ну пожааалуйста',
+    'В день рождения отказываться нельзя! 🎂', 'Столик почти забронирован ✨', 'Последний шанс!',
+    'Ладно, «Нет» сломалась', 'Только «Да» работает 💘'
+  ];
+  let tries = 0;
+
+  function runAway(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    tries++;
+    const r = no.getBoundingClientRect();
+    if (!no.classList.contains('flying')) {
+      document.body.appendChild(no);
+      no.style.left = r.left + 'px';
+      no.style.top = r.top + 'px';
+      no.classList.add('flying');
+      void no.offsetWidth;
+    }
+    const pad = 12;
+    const maxX = window.innerWidth - r.width - pad;
+    const maxY = window.innerHeight - r.height - pad;
+    let x, y, guard = 0;
+    do {
+      x = pad + Math.random() * (maxX - pad);
+      y = pad + Math.random() * (maxY - pad);
+      guard++;
+    } while (Math.hypot(x - r.left, y - r.top) < Math.min(window.innerWidth, window.innerHeight) * 0.35 && guard < 30);
+    no.style.left = x + 'px';
+    no.style.top = y + 'px';
+
+    hint.textContent = phrases[(tries - 1) % phrases.length];
+    const scale = Math.min(1 + tries * 0.12, 2.2);
+    yes.style.transform = 'scale(' + scale + ')';
+    if (tries >= 6) no.textContent = ['Нет?', 'Не-а', 'Ой'][tries % 3];
+  }
+
+  no.addEventListener('mouseenter', runAway);
+  no.addEventListener('pointerdown', runAway);
+  no.addEventListener('touchstart', runAway, { passive: false });
+  no.addEventListener('click', runAway);
+
+  document.addEventListener('mousemove', (e) => {
+    if (!document.getElementById('s1').classList.contains('active')) return;
+    const r = no.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    if (Math.hypot(e.clientX - cx, e.clientY - cy) < 70) runAway();
+  });
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('card').classList.toggle('wide', id === 's2');
+    window.scrollTo(0, 0);
+  }
+
+  function confetti() {
+    const colors = ['#ff4f8b', '#ffb3c8', '#ffd166', '#7fbf7a', '#b9e3a6'];
+    for (let i = 0; i < 90; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[i % colors.length];
+      c.style.animationDuration = 2 + Math.random() * 2.5 + 's';
+      c.style.animationDelay = Math.random() * 0.6 + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 5500);
+    }
+  }
+
+  yes.addEventListener('click', () => {
+    no.style.display = 'none';
+    confetti();
+    show('s2');
+  });
+
+  // Карточки ресторанов
+  let chosen = null;
+  function fill(rowId, list) {
+    const row = document.getElementById(rowId);
+    list.forEach(r => {
+      const b = document.createElement('div');
+      b.className = 'rest';
+      b.setAttribute('role', 'button');
+      b.innerHTML =
+        '<span class="ico">' + svgIcon(r.e) + '</span>' +
+        '<span class="name">' + r.name + '</span>' +
+        '<span class="metro"><span class="mi">М</span>' + r.metro + '</span>' +
+        '<span class="cuisine">🍽 ' + r.cuisine + '</span>' +
+        '<span class="view">' + r.view + '</span>' +
+        (r.music ? '<span class="music">🎵 Живая музыка' + (r.music === true ? '' : ': ' + r.music) + '</span>' : '') +
+        '<span class="dish"><b>⭐ ' + (r.tag || 'Фирменное от шефа') + '</b>' + r.dish + '</span>' +
+        (r.gift ? '<span class="gift">🎁 ' + r.gift + '</span>' : '') +
+        '<span class="addr">📍 ' + r.addr + '</span>' +
+        '<a class="photo" target="_blank" rel="noopener" href="https://yandex.ru/maps/2/saint-petersburg/search/' + encodeURIComponent(r.q) + '/">📸 Фото вида</a>';
+      b.addEventListener('click', (ev) => {
+        if (ev.target.closest('.photo')) return;
+        document.querySelectorAll('.rest').forEach(x => x.classList.remove('sel'));
+        b.classList.add('sel');
+        chosen = r;
+        document.getElementById('err').textContent = '';
+      });
+      row.appendChild(b);
+    });
+  }
+  fill('row1', row1);
+  fill('row2', row2);
+
+  // Время: с 13:00 до 22:00 каждые 30 минут
+  const pad2 = n => String(n).padStart(2, '0');
+  const timeEl = document.getElementById('time');
+  timeEl.innerHTML = '<option value="">—:—</option>';
+  for (let h = 13; h <= 22; h++) {
+    for (const m of ['00', '30']) {
+      if (h === 22 && m === '30') continue;
+      const v = pad2(h) + ':' + m;
+      timeEl.insertAdjacentHTML('beforeend', '<option value="' + v + '">' + v + '</option>');
+    }
+  }
+  timeEl.value = '19:00';
+
+
+  document.getElementById('done').addEventListener('click', () => {
+    const err = document.getElementById('err');
+    if (!chosen) { err.textContent = 'Выбери ресторан 🙂'; return; }
+    if (!timeEl.value) { err.textContent = 'Выбери время ⏰'; return; }
+    document.getElementById('final').innerHTML =
+      'Отмечаем твой день рождения в <b>' + chosen.name + '</b> в субботу, 21 ноября, в ' + timeEl.value + '.<br>' +
+      '📍 ' + chosen.addr + ' · м. ' + chosen.metro + '<br><br>Столик забронирую сам. Жду с нетерпением! ✨';
+    confetti();
+    show('s3');
+  });
+
+  window.addEventListener('resize', () => {
+    if (no.classList.contains('flying')) {
+      const r = no.getBoundingClientRect();
+      no.style.left = Math.min(r.left, window.innerWidth - r.width - 12) + 'px';
+      no.style.top = Math.min(r.top, window.innerHeight - r.height - 12) + 'px';
+    }
+  });
+</script>
+</body>
+</html>
