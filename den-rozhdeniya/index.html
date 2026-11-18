@@ -56,7 +56,7 @@
 
   .rowtitle { text-align:left; font-weight:700; font-size:15px; margin:14px 4px 8px; }
   .row {
-    display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; text-align:left;
+    display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; text-align:left;
   }
   @media (max-width: 900px) {
     .row {
@@ -91,6 +91,17 @@
   .rest .view { flex:0 0 auto !important; }
   .rest .addr { margin-top:auto; }
   .rest .gift { font-size:12px; font-weight:800; color:#2f8a3b; background:#eefae9; border-radius:10px; padding:5px 8px; }
+  .toprow { display:block; text-align:left; }
+  .rest.top { position:relative; display:grid; grid-template-columns:1fr 1fr; gap:10px 22px; padding:22px 22px 18px; border:2px solid #f2c14e;
+              background:linear-gradient(135deg,#fffdf5,#fff7fb); box-shadow:0 10px 26px rgba(242,193,78,.28); }
+  .rest.top .col { display:flex; flex-direction:column; gap:7px; }
+  .rest.top .name { font-size:24px; }
+  .rest.top .view { font-size:14.5px; }
+  .rest.top .ico { width:64px; height:64px; }
+  .rest.top .ico svg { width:34px; height:34px; }
+  .topbadge { position:absolute; top:-12px; right:18px; background:linear-gradient(135deg,#f2b705,#ff8a3d); color:#fff; font-weight:800; font-size:12px; letter-spacing:.03em; padding:5px 12px; border-radius:999px; box-shadow:0 4px 10px rgba(242,183,5,.4); }
+  .rest.top.sel { border-color:var(--pink); }
+  @media (max-width: 700px) { .rest.top { grid-template-columns:1fr; } }
   .rest .ya { display:block; font-size:11.5px; line-height:1.4; color:#555; border-top:1px solid #eee; padding-top:7px; font-style:italic; }
   .rest .ya-top { display:block; font-style:normal; font-size:11px; color:#888; margin-bottom:2px; }
   .rest .ya-top b { color:#e8a100; font-size:12px; }
@@ -138,11 +149,17 @@
     <h1>Ура! Будет праздник! 🥂</h1>
     <p class="sub" style="margin-bottom:6px">Надевай самое красивое платье 👗 и выбирай, где отметим твой день рождения:</p>
 
-    <div class="rowtitle"><svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5z"/><path d="M5 21h14"/></svg>Роскошные интерьеры</div>
+    <div class="rowtitle"><svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5z"/><path d="M5 21h14"/></svg>ТОП-1 по роскоши интерьера</div>
+    <div class="toprow" id="top1"></div>
+
+    <div class="rowtitle"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>ТОП-1 по виду на Петербург</div>
+    <div class="toprow row2" id="top2"></div>
+
+    <div class="rowtitle"><svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5z"/><path d="M5 21h14"/></svg>Ещё роскошные интерьеры</div>
     <div class="swipe">листай вбок →</div>
     <div class="row" id="row1"></div>
 
-    <div class="rowtitle"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Вид, от которого захватывает дух</div>
+    <div class="rowtitle"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Ещё виды, от которых захватывает дух</div>
     <div class="swipe">листай вбок →</div>
     <div class="row row2" id="row2"></div>
 
@@ -292,24 +309,32 @@
 
   // Карточки ресторанов
   let chosen = null;
-  function fill(rowId, list) {
+  function cardParts(r) {
+    const left =
+      '<span class="ico">' + svgIcon(r.e) + '</span>' +
+      '<span class="name">' + r.name + '</span>' +
+      '<span class="metro"><span class="mi">М</span>' + r.metro + '</span>' +
+      '<span class="cuisine">🍽 ' + r.cuisine + '</span>' +
+      '<span class="view">' + r.view + '</span>' +
+      (r.music ? '<span class="music">🎵 Живая музыка' + (r.music === true ? '' : ': ' + r.music) + '</span>' : '');
+    const right =
+      '<span class="dish"><b>⭐ ' + (r.tag || 'Фирменное от шефа') + '</b>' + r.dish + '</span>' +
+      (r.gift ? '<span class="gift">🎁 ' + r.gift + '</span>' : '') +
+      '<span class="addr">📍 ' + r.addr + '</span>' +
+      '<a class="photo" target="_blank" rel="noopener" href="https://yandex.ru/maps/2/saint-petersburg/search/' + encodeURIComponent(r.q) + '/">📸 Фото вида</a>' +
+      '<span class="ya"><span class="ya-top"><b>★ ' + r.ya.r + '</b> · ' + r.ya.n + ' на Яндекс Картах</span>«' + r.ya.t + '»</span>';
+    return [left, right];
+  }
+  function fill(rowId, list, top) {
     const row = document.getElementById(rowId);
     list.forEach(r => {
       const b = document.createElement('div');
-      b.className = 'rest';
+      b.className = 'rest' + (top ? ' top' : '');
       b.setAttribute('role', 'button');
-      b.innerHTML =
-        '<span class="ico">' + svgIcon(r.e) + '</span>' +
-        '<span class="name">' + r.name + '</span>' +
-        '<span class="metro"><span class="mi">М</span>' + r.metro + '</span>' +
-        '<span class="cuisine">🍽 ' + r.cuisine + '</span>' +
-        '<span class="view">' + r.view + '</span>' +
-        (r.music ? '<span class="music">🎵 Живая музыка' + (r.music === true ? '' : ': ' + r.music) + '</span>' : '') +
-        '<span class="dish"><b>⭐ ' + (r.tag || 'Фирменное от шефа') + '</b>' + r.dish + '</span>' +
-        (r.gift ? '<span class="gift">🎁 ' + r.gift + '</span>' : '') +
-        '<span class="addr">📍 ' + r.addr + '</span>' +
-        '<a class="photo" target="_blank" rel="noopener" href="https://yandex.ru/maps/2/saint-petersburg/search/' + encodeURIComponent(r.q) + '/">📸 Фото вида</a>' +
-        '<span class="ya"><span class="ya-top"><b>★ ' + r.ya.r + '</b> · ' + r.ya.n + ' на Яндекс Картах</span>«' + r.ya.t + '»</span>';
+      const [left, right] = cardParts(r);
+      b.innerHTML = top
+        ? '<span class="topbadge">🏆 ' + top + '</span><div class="col">' + left + '</div><div class="col">' + right + '</div>'
+        : left + right;
       b.addEventListener('click', (ev) => {
         if (ev.target.closest('.photo')) return;
         document.querySelectorAll('.rest').forEach(x => x.classList.remove('sel'));
@@ -320,6 +345,11 @@
       row.appendChild(b);
     });
   }
+  const pick = (list, name) => list.splice(list.findIndex(x => x.name === name), 1)[0];
+  const topInterior = pick(row1, 'Палкинъ');
+  const topView = pick(row2, 'Мансарда');
+  fill('top1', [topInterior], 'ТОП-1 · самый роскошный');
+  fill('top2', [topView], 'ТОП-1 · самый знаменитый вид');
   fill('row1', row1);
   fill('row2', row2);
 
